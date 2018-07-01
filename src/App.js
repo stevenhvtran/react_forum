@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
 import { Fetch } from "react-request";
+import loading from "./loading.gif";
 
 class App extends Component {
   render() {
@@ -19,7 +20,7 @@ class Posts extends Component {
       <Fetch url="https://flask-forum-api.herokuapp.com/api/posts">
         {({ fetching, failed, data }) => {
           if (fetching) {
-            return <div className="post-wrapper">Loading data...</div>;
+            return <div className="post-wrapper"><img className="center" src={loading} alt="loading"/></div>;
           }
 
           if (failed) {
@@ -49,7 +50,7 @@ class Post extends Component {
       <Fetch url={this.baseApiUrl + this.props.post_id}>
         {({ fetching, failed, data }) => {
           if (fetching) {
-            return <div className="post">Loading data...</div>;
+            return <div className="post"><img className="center" src={loading} alt="loading"/></div>;
           }
 
           if (failed) {

@@ -26,3 +26,8 @@ div.post-wrapper {
   margin-left: 0.5%;
   padding: 0.5%;
 }
+
+.center {
+  display: block;
+  margin: auto;
+}
