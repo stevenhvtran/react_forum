@@ -1,18 +1,28 @@
-.App {
-  text-align: center;
+h1.title {  
+  padding-left: 2%;
+  padding-bottom: 20px;
+  color: rgb(28, 28, 28);
+  border-bottom: 1px solid rgb(196, 196, 196);
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+div.post {
+  padding: 1%;
+  border: 1px solid rgb(196, 196, 196);
+  border-radius: 5px;
 }
 
-.App-title {
-  font-size: 1.5em;
+div.post-title {
+  font-weight: bold;
 }
 
-.App-intro {
-  font-size: large;
+div.post-author {
+  color: rgb(130, 130, 130);
+  font-size: 15px;
+}
+
+div.post-wrapper {
+  border: 1px solid rgb(196, 196, 196);
+  margin-right: 10%;
+  margin-left: 0.5%;
+  padding: 0.5%;
 }

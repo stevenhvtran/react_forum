@@ -7,34 +7,61 @@ class App extends Component {
     return (
       <body>
         <h1 className="title">REACT FORUM</h1>
-        <Post post_id="1" />
+        <Posts />
       </body>
     );
   }
 }
 
-class Post extends Component {
+class Posts extends Component {
   render() {
     return (
-      <Fetch
-        url={
-          "https://flask-forum-api.herokuapp.com/api/post/" + this.props.post_id
-        }
-        method="GET"
-      >
+      <Fetch url="https://flask-forum-api.herokuapp.com/api/posts">
         {({ fetching, failed, data }) => {
           if (fetching) {
-            return <div>Loading data...</div>;
+            return <div className="post-wrapper">Loading data...</div>;
           }
 
           if (failed) {
-            return <div>The request did not succeed.</div>;
+            return <div className="post-wrapper">The request did not succeed.</div>;
+          }
+
+          if (data) {
+            var postsElements = data.posts;
+            return <div className="post-wrapper"> {postsElements.map(post => (<Post post_id={post.post_id}/>))} </div>
+          }
+
+          return null;
+        }}
+      </Fetch>
+    );
+  }
+}
+
+class Post extends Component {
+  constructor(props) {
+    super(props);
+    this.baseApiUrl = "https://flask-forum-api.herokuapp.com/api/post/";
+  }
+
+  render() {
+    return (
+      <Fetch url={this.baseApiUrl + this.props.post_id}>
+        {({ fetching, failed, data }) => {
+          if (fetching) {
+            return <div className="post">Loading data...</div>;
+          }
+
+          if (failed) {
+            return <div className="post">The request did not succeed.</div>;
           }
 
           if (data) {
             return (
-              <div>
-                <div>Post Title: {data.title}</div>
+              <div className="post">
+                <div className="post-title">{data.title}</div>
+                <div className="post-body">{data.body}</div>
+                <div className="post-author">by {data.author_name}</div>
               </div>
             );
           }
