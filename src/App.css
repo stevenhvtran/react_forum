@@ -31,3 +31,8 @@ div.post-wrapper {
   display: block;
   margin: auto;
 }
+
+div.register {
+  padding: 0.5%;
+  padding-bottom: 1%;
+}
