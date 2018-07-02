@@ -25,7 +25,7 @@ class RegisterForm extends Component {
     };
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handeClick = this.handeClick.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleUserChange(event) {
@@ -37,7 +37,7 @@ class RegisterForm extends Component {
     this.setState({ showFetch: false });
   }
 
-  handeClick() {
+  handleClick() {
     this.setState({ showFetch: true });
   }
 
@@ -69,7 +69,7 @@ class RegisterForm extends Component {
             value={this.state.password}
             onChange={this.handlePasswordChange}
           />
-          <button type="button" onClick={this.handeClick}>
+          <button type="button" onClick={this.handleClick}>
             Register
           </button>
         </form>
