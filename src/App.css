@@ -25,6 +25,18 @@ div.register {
   padding-top: 2%;
 }
 
+div.posts-banner {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5%;
+}
+
+div.posts-title {
+  font-weight: bold;
+  font-size: 125%;
+  padding: 0.5%;
+}
+
 h1.title {
   color: rgb(28, 28, 28);
 }
@@ -34,6 +46,12 @@ div.login {
 }
 
 div.post {
+  padding: 1%;
+  border: 1px solid rgb(196, 196, 196);
+  border-radius: 5px;
+}
+
+div.submit {
   padding: 1%;
   border: 1px solid rgb(196, 196, 196);
   border-radius: 5px;
@@ -58,4 +76,17 @@ div.post-wrapper {
 .center {
   display: block;
   margin: auto;
+}
+
+input.title {
+  width: 40%;
+  resize: none;
+  display: block;
+}
+
+input.body {
+  width: 40%;
+  height: 150px;
+  resize: none;
+  display: block;
 }

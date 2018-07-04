@@ -70,7 +70,7 @@ class App extends Component {
           <h1 className="title">React Forum</h1>
           {this.handleLoginLogout()}
         </div>
-        <PostWrapper />
+        <PostWrapper credentials={this.state.credentials} />
       </body>
     );
   }
@@ -118,26 +118,30 @@ class Register extends Component {
   render() {
     return (
       <div className="register">
-      <form>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={this.state.username}
-          onChange={this.handleUserChange}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={this.state.password}
-          onChange={this.handlePasswordChange}
-        />
-        <button type="button" onClick={this.handleClick}>
-          Register
+        <form autocomplete="off">
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={this.state.username}
+            onChange={this.handleUserChange}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={this.state.password}
+            onChange={this.handlePasswordChange}
+            required
+          />
+          <button type="button" onClick={this.handleClick}>
+            Register
+          </button>
+        </form>
+        <button type="button" onClick={this.props.onExit}>
+          Login
         </button>
-      </form>
-      <button type="button" onClick={this.props.onExit}>Login</button>
       </div>
     );
   }
@@ -181,13 +185,14 @@ class Login extends Component {
 
   render() {
     return (
-      <form>
+      <form autocomplete="off">
         <input
           type="text"
           name="username"
           placeholder="Username"
           value={this.state.username}
           onChange={this.handleUserChange}
+          required
         />
         <input
           type="password"
@@ -195,6 +200,7 @@ class Login extends Component {
           placeholder="Password"
           value={this.state.password}
           onChange={this.handlePasswordChange}
+          required
         />
         <button type="button" onClick={this.handleClick}>
           Login
@@ -207,8 +213,11 @@ class Login extends Component {
 class PostWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { posts: "" };
+    this.state = { posts: "", showSubmit: false };
     this.loadPosts = this.loadPosts.bind(this);
+    this.handleSubmit = this.enableSubmit.bind(this);
+    this.enableSubmit = this.enableSubmit.bind(this);
+    this.disableSubmit = this.disableSubmit.bind(this);
   }
 
   loadPosts() {
@@ -226,15 +235,118 @@ class PostWrapper extends Component {
   }
 
   componentDidMount() {
-    this.setState({ posts: <img src={loading_gif} alt="loading-gif" /> });
+    this.setState({
+      posts: <img className="center" src={loading_gif} alt="loading-gif" />
+    });
     this.loadPosts();
+  }
+
+  enableSubmit() {
+    this.setState({ showSubmit: true });
+  }
+
+  disableSubmit() {
+    this.setState({ showSubmit: false });
+  }
+
+  showSubmit() {
+    if (this.state.showSubmit) {
+      return (
+        <SubmitPost
+          onExit={this.disableSubmit}
+          credentials={this.props.credentials}
+          reloadPosts={this.loadPosts}
+        />
+      );
+    }
+  }
+
+  showSubmitButton() {
+    if (this.props.credentials) {
+      return <button onClick={this.enableSubmit}>Submit Post</button>;
+    }
   }
 
   render() {
     return (
       <div className="post-wrapper">
-        <div className="post-title">Posts</div>
+        <div className="posts-banner">
+          <div className="posts-title">Posts</div>
+          {this.showSubmitButton()}
+        </div>
+        {this.showSubmit()}
         {this.state.posts}
+      </div>
+    );
+  }
+}
+
+class SubmitPost extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { title: "", body: "" };
+    this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.handleBodyChange = this.handleBodyChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleTitleChange(event) {
+    this.setState({ title: event.target.value });
+  }
+
+  handleBodyChange(event) {
+    this.setState({ body: event.target.value });
+  }
+
+  handleClick() {
+    fetch("https://flask-forum-api.herokuapp.com/api/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.props.credentials
+      },
+      mode: "cors",
+      body: JSON.stringify({
+        title: this.state.title,
+        body: this.state.body
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        if (json.message) {
+          this.props.onExit();
+          this.props.reloadPosts();
+        }
+      });
+  }
+
+  render() {
+    return (
+      <div className="submit">
+        <form className="pure-form-stacked" autocomplete="off">
+          <input
+            type="text"
+            name="title"
+            placeholder="Write post title here..."
+            value={this.state.title}
+            onChange={this.handleTitleChange}
+            className="title"
+            required
+          />
+          <input
+            type="text"
+            name="body"
+            placeholder="Write post body here..."
+            value={this.state.body}
+            onChange={this.handleBodyChange}
+            className="body"
+          />
+          <button type="button" onClick={this.handleClick}>
+            Submit
+          </button>
+        </form>
       </div>
     );
   }
@@ -266,7 +378,9 @@ class Post extends Component {
   }
 
   componentDidMount() {
-    this.setState({ posts: <img src={loading_gif} alt="loading-gif" /> });
+    this.setState({
+      post: <img className="center" src={loading_gif} alt="loading-gif" />
+    });
     this.loadPost();
   }
 
