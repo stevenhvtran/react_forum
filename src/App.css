@@ -1,8 +1,36 @@
-h1.title {  
-  padding-left: 2%;
-  padding-bottom: 20px;
-  color: rgb(28, 28, 28);
+div.banner {
   border-bottom: 1px solid rgb(196, 196, 196);
+  margin-bottom: 1%;
+  padding: 2%;
+  padding-top: 0%;
+  padding-bottom: 0%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sep {
+  display: flex;
+  justify-content: space-between;
+}
+
+div.logged-in {
+  display: flex;
+  justify-content: space-between;
+  padding: 3%;
+}
+
+div.register {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 2%;
+}
+
+h1.title {
+  color: rgb(28, 28, 28);
+}
+
+div.login {
+  padding-top: 1%;
 }
 
 div.post {
@@ -25,11 +53,6 @@ div.post-wrapper {
   margin-right: 10%;
   margin-left: 0.5%;
   padding: 0.5%;
-}
-
-div.login {
-  padding: 0.5%;
-  padding-bottom: 1%;
 }
 
 .center {

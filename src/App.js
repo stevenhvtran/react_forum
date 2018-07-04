@@ -5,46 +5,140 @@ import loading_gif from "./loading.gif";
 class App extends Component {
   constructor() {
     super();
-    this.state = { isLoggedIn: false, credentials: "", user:"Guest"};
+    this.state = {
+      isLoggedIn: false,
+      credentials: "",
+      user: "Guest",
+      showRegister: false
+    };
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
+    this.handleRegister = this.handleRegister.bind(this);
+    this.handleRegisterExit = this.handleRegisterExit.bind(this);
   }
 
   handleLogin(credentials, user) {
-    this.setState({ isLoggedIn: true, credentials: credentials , user:user});
+    this.setState({ isLoggedIn: true, credentials: credentials, user: user });
   }
 
   handleLogout() {
-    this.setState({ isLoggedIn: false , credentials: "", user: "Guest"});
+    this.setState({ isLoggedIn: false, credentials: "", user: "Guest" });
+  }
+
+  handleRegister() {
+    this.setState({ showRegister: true });
+  }
+
+  handleRegisterExit() {
+    this.setState({ showRegister: false });
   }
 
   handleLoginLogout() {
     const isLoggedIn = this.state.isLoggedIn;
-    let button;
-
-    if (isLoggedIn) {
-      // button = <Logout onClick={this.handleLogoutClick} />;
-      button = "";
+    const showRegister = this.state.showRegister;
+    let display_elements;
+    if (showRegister) {
+      display_elements = <Register onExit={this.handleRegisterExit} />;
     } else {
-      button = <Login onSuccess={this.handleLogin} />;
+      if (isLoggedIn) {
+        display_elements = (
+          <div className="logged-in">
+            {"Logged in as " + this.state.user}
+            <button onClick={this.handleLogout}>Logout</button>
+          </div>
+        );
+      } else {
+        display_elements = (
+          <div>
+            <div className="sep">
+              Not signed in{" "}
+              <button onClick={this.handleRegister}>Register</button>
+            </div>
+            <Login onSuccess={this.handleLogin} />
+          </div>
+        );
+      }
     }
 
-    return (
-      <div className="login">
-        {/* <Greeting isLoggedIn={isLoggedIn} /> */}
-        Hello {this.state.user}
-        {button}
-      </div>
-    );
+    return <div className="login">{display_elements}</div>;
   }
 
   render() {
     return (
       <body>
-        <h1 className="title">React Forum</h1>
-        <div>{this.handleLoginLogout()}</div>
+        <div className="banner">
+          <h1 className="title">React Forum</h1>
+          {this.handleLoginLogout()}
+        </div>
         <PostWrapper />
       </body>
+    );
+  }
+}
+
+class Register extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { username: "", password: "" };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleUserChange = this.handleUserChange.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
+  }
+
+  handleUserChange(event) {
+    this.setState({ username: event.target.value });
+  }
+
+  handlePasswordChange(event) {
+    this.setState({ password: event.target.value });
+  }
+
+  handleClick() {
+    fetch("https://flask-forum-api.herokuapp.com/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      mode: "cors",
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        if (json.message) {
+          this.props.onExit();
+        }
+      });
+  }
+
+  render() {
+    return (
+      <div className="register">
+      <form>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={this.state.username}
+          onChange={this.handleUserChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={this.state.password}
+          onChange={this.handlePasswordChange}
+        />
+        <button type="button" onClick={this.handleClick}>
+          Register
+        </button>
+      </form>
+      <button type="button" onClick={this.props.onExit}>Login</button>
+      </div>
     );
   }
 }
@@ -59,22 +153,22 @@ class Login extends Component {
   }
 
   handleClick() {
-    var credentials = "Basic " + btoa(this.state.username + ":" + this.state.password)
+    var credentials =
+      "Basic " + btoa(this.state.username + ":" + this.state.password);
     fetch("https://flask-forum-api.herokuapp.com/api/", {
       headers: {
         Accept: "application/json",
         Authorization: credentials
       }
     })
-    .then (response => {
-      return response.json();
-    })
-    .then (json => {
-      if (json.message === "Hello steven") {
-        this.props.onSuccess(credentials, this.state.username)
-      }
-    })
-    ;
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        if (json.message) {
+          this.props.onSuccess(credentials, this.state.username);
+        }
+      });
   }
 
   handleUserChange(event) {
@@ -137,7 +231,12 @@ class PostWrapper extends Component {
   }
 
   render() {
-    return <div className="post-wrapper">{this.state.posts}</div>;
+    return (
+      <div className="post-wrapper">
+        <div className="post-title">Posts</div>
+        {this.state.posts}
+      </div>
+    );
   }
 }
 
