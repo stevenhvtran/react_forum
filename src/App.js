@@ -1,297 +1,178 @@
 import React, { Component } from "react";
 import "./App.css";
-import { Fetch } from "react-request";
-import loading from "./loading.gif";
+import loading_gif from "./loading.gif";
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = { isLoggedIn: false, credentials: "", user:"Guest"};
+    this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+  }
+
+  handleLogin(credentials, user) {
+    this.setState({ isLoggedIn: true, credentials: credentials , user:user});
+  }
+
+  handleLogout() {
+    this.setState({ isLoggedIn: false , credentials: "", user: "Guest"});
+  }
+
+  handleLoginLogout() {
+    const isLoggedIn = this.state.isLoggedIn;
+    let button;
+
+    if (isLoggedIn) {
+      // button = <Logout onClick={this.handleLogoutClick} />;
+      button = "";
+    } else {
+      button = <Login onSuccess={this.handleLogin} />;
+    }
+
+    return (
+      <div className="login">
+        {/* <Greeting isLoggedIn={isLoggedIn} /> */}
+        Hello {this.state.user}
+        {button}
+      </div>
+    );
+  }
+
   render() {
     return (
       <body>
-        <h1 className="title">REACT FORUM</h1>
-        <PostsWrapper />
+        <h1 className="title">React Forum</h1>
+        <div>{this.handleLoginLogout()}</div>
+        <PostWrapper />
       </body>
     );
   }
 }
 
 class Login extends Component {
-  handleLogin(e) {
-    e.preventDefault();
-    this.props.view
-  }
-  render() {
-    return (
-      <Fetch
-        url={"https://flask-forum-api.herokuapp.com/"}
-        method="GET"
-        headers={{
-          Accept: "application/json",
-          Authorization:
-            "Basic " + btoa(this.props.username + ":" + this.props.password)
-        }}
-        cacheResponse={false}
-        lazy={false}
-      >
-        {({ fetching, failed, data }) => {
-          if (fetching) {
-            return <img src={loading} alt="loading" />;
-          }
-
-          if (failed) {
-            return <strong>Login failed</strong>;
-          }
-
-          if (data) {
-            return <strong onLoad={this.handleLogin.bind(this)}>Login success!</strong>;
-          }
-        }}
-      </Fetch>
-    );
-  }
-}
-
-class LoginForm extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      username: "",
-      password: "",
-      showFetch: false
-    };
+    this.state = { username: "", password: "" };
+    this.handleClick = this.handleClick.bind(this);
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    var credentials = "Basic " + btoa(this.state.username + ":" + this.state.password)
+    fetch("https://flask-forum-api.herokuapp.com/api/", {
+      headers: {
+        Accept: "application/json",
+        Authorization: credentials
+      }
+    })
+    .then (response => {
+      return response.json();
+    })
+    .then (json => {
+      if (json.message === "Hello steven") {
+        this.props.onSuccess(credentials, this.state.username)
+      }
+    })
+    ;
   }
 
   handleUserChange(event) {
     this.setState({ username: event.target.value });
-    this.setState({ showFetch: false });
   }
+
   handlePasswordChange(event) {
     this.setState({ password: event.target.value });
-    this.setState({ showFetch: false });
-  }
-
-  handleClick() {
-    this.setState({ showFetch: true });
   }
 
   render() {
     return (
-      <div className="register">
-        <strong>
-          {this.state.showFetch ? (
-            <Login
-              username={this.state.username}
-              password={this.state.password}
-            />
-          ) : (
-            <strong>Login</strong>
-          )}
-        </strong>
-        <form>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={this.state.username}
-            onChange={this.handleUserChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={this.state.password}
-            onChange={this.handlePasswordChange}
-          />
-          <button type="button" onClick={this.handleClick}>
-            Login
-          </button>
-        </form>
-      </div>
+      <form>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={this.state.username}
+          onChange={this.handleUserChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={this.state.password}
+          onChange={this.handlePasswordChange}
+        />
+        <button type="button" onClick={this.handleClick}>
+          Login
+        </button>
+      </form>
     );
   }
 }
 
-class RegisterForm extends Component {
+class PostWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      username: "",
-      password: "",
-      showFetch: false
-    };
-    this.handleUserChange = this.handleUserChange.bind(this);
-    this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.state = { posts: "" };
+    this.loadPosts = this.loadPosts.bind(this);
   }
 
-  handleUserChange(event) {
-    this.setState({ username: event.target.value });
-    this.setState({ showFetch: false });
-  }
-  handlePasswordChange(event) {
-    this.setState({ password: event.target.value });
-    this.setState({ showFetch: false });
-  }
-
-  handleClick() {
-    this.setState({ showFetch: true });
-  }
-
-  render() {
-    return (
-      <div className="register">
-        <strong>
-          {this.state.showFetch ? (
-            <Register
-              username={this.state.username}
-              password={this.state.password}
-            />
-          ) : (
-            <strong>Register</strong>
-          )}
-        </strong>
-        <form>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={this.state.username}
-            onChange={this.handleUserChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={this.state.password}
-            onChange={this.handlePasswordChange}
-          />
-          <button type="button" onClick={this.handleClick}>
-            Register
-          </button>
-        </form>
-      </div>
-    );
-  }
-}
-
-class Register extends Component {
-  render() {
-    return (
-      <Fetch
-        url="https://flask-forum-api.herokuapp.com/api/register"
-        method="POST"
-        body={JSON.stringify({
-          username: this.props.username,
-          password: this.props.password
-        })}
-        headers={{
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        }}
-        lazy={false}
-      >
-        {({ fetching, failed, data }) => {
-          if (fetching) {
-            return <img src={loading} alt="loading" />;
-          }
-
-          if (failed) {
-            return <strong>Registration failed</strong>;
-          }
-
-          if (data) {
-            return <strong>Registration success!</strong>;
-          }
-        }}
-      </Fetch>
-    );
-  }
-}
-
-class PostsWrapper extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      view: "login",
-      credentials: null
-    };
+  loadPosts() {
+    fetch("https://flask-forum-api.herokuapp.com/api/posts")
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        var post_array = [];
+        json.posts.map(post =>
+          post_array.push(<Post post_id={post.post_id} />)
+        );
+        this.setState({ posts: post_array });
+      });
   }
 
-  changeView(creds) {
-    this.setState({
-      view: "project",
-      // credentials: creds
-    });
+  componentDidMount() {
+    this.setState({ posts: <img src={loading_gif} alt="loading-gif" /> });
+    this.loadPosts();
   }
 
   render() {
-    return (
-      <div className="post-wrapper">
-        {this.state.view}
-        {this.state.view === "login" ? (
-          <div>
-            <RegisterForm />
-            <LoginForm view={this.changeView.bind(this)}/>
-          </div>
-        ) : null}
-        <Fetch url="https://flask-forum-api.herokuapp.com/api/posts">
-          {({ fetching, failed, data }) => {
-            if (fetching) {
-              return <img className="center" src={loading} alt="loading" />;
-            }
-
-            if (failed) {
-              return "The request did not succeed.";
-            }
-
-            if (data) {
-              return data.posts.map(post => <Post post_id={post.post_id} />);
-            }
-
-            return null;
-          }}
-        </Fetch>
-      </div>
-    );
+    return <div className="post-wrapper">{this.state.posts}</div>;
   }
 }
 
 class Post extends Component {
   constructor(props) {
     super(props);
-    this.baseApiUrl = "https://flask-forum-api.herokuapp.com/api/post/";
+    this.state = { post: "" };
+    this.loadPosts = this.loadPost.bind(this);
+  }
+
+  loadPost() {
+    fetch(
+      "https://flask-forum-api.herokuapp.com/api/post/" + this.props.post_id
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        this.setState({
+          post: [
+            <div className="post-title">{json.title}</div>,
+            <div>{json.body}</div>,
+            <div className="post-author">by {json.author_name}</div>
+          ]
+        });
+      });
+  }
+
+  componentDidMount() {
+    this.setState({ posts: <img src={loading_gif} alt="loading-gif" /> });
+    this.loadPost();
   }
 
   render() {
-    return (
-      <div className="post">
-        <Fetch url={this.baseApiUrl + this.props.post_id}>
-          {({ fetching, failed, data }) => {
-            if (fetching) {
-              return <img className="center" src={loading} alt="loading" />;
-            }
-
-            if (failed) {
-              return "The request did not succeed.";
-            }
-
-            if (data) {
-              return (
-                <div>
-                  <div className="post-title">{data.title}</div>
-                  <div className="post-body">{data.body}</div>
-                  <div className="post-author">by {data.author_name}</div>
-                </div>
-              );
-            }
-
-            return null;
-          }}
-        </Fetch>
-      </div>
-    );
+    return <div className="post">{this.state.post}</div>;
   }
 }
 
