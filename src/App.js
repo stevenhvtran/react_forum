@@ -70,7 +70,10 @@ class App extends Component {
           <h1 className="title">React Forum</h1>
           {this.handleLoginLogout()}
         </div>
-        <PostWrapper credentials={this.state.credentials} />
+        <PostWrapper
+          credentials={this.state.credentials}
+          user={this.state.user}
+        />
       </body>
     );
   }
@@ -228,7 +231,14 @@ class PostWrapper extends Component {
       .then(json => {
         var post_array = [];
         json.posts.map(post =>
-          post_array.push(<Post post_id={post.post_id} />)
+          post_array.push(
+            <Post
+              post_id={post.post_id}
+              credentials={this.props.credentials}
+              user={this.props.user}
+              onUpdate={this.loadPosts}
+            />
+          )
         );
         this.setState({ posts: post_array });
       });
@@ -239,6 +249,12 @@ class PostWrapper extends Component {
       posts: <img className="center" src={loading_gif} alt="loading-gif" />
     });
     this.loadPosts();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.user !== this.props.user) {
+      this.loadPosts();
+    }
   }
 
   enableSubmit() {
@@ -355,9 +371,34 @@ class SubmitPost extends Component {
 class Post extends Component {
   constructor(props) {
     super(props);
-    this.state = { post: "" };
+    this.state = { post: "", user: "" };
     this.loadPosts = this.loadPost.bind(this);
+    this.deletePost = this.deletePost.bind(this);
+    this.showEdit = this.showEdit.bind(this);
   }
+
+  deletePost() {
+    fetch(
+      "https://flask-forum-api.herokuapp.com/api/post/" + this.props.post_id,
+      {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          Authorization: this.props.credentials
+        }
+      }
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        if (json.message) {
+          this.props.onUpdate()
+        }
+      });
+  }
+
+  showEdit() {}
 
   loadPost() {
     fetch(
@@ -367,13 +408,22 @@ class Post extends Component {
         return response.json();
       })
       .then(json => {
-        this.setState({
-          post: [
-            <div className="post-title">{json.title}</div>,
-            <div>{json.body}</div>,
+        var postData = [
+          <div>
+            <div className="post-title">{json.title}</div>
+            <div>{json.body}</div>
             <div className="post-author">by {json.author_name}</div>
-          ]
-        });
+          </div>
+        ];
+        if (json.author_name === this.props.user) {
+          postData.push(
+            <div>
+              <button onClick={this.showEdit}>Edit</button>
+              <button onClick={this.deletePost}>Delete</button>
+            </div>
+          );
+        }
+        this.setState({ post: <div className="sep">{postData}</div> });
       });
   }
 
@@ -382,6 +432,12 @@ class Post extends Component {
       post: <img className="center" src={loading_gif} alt="loading-gif" />
     });
     this.loadPost();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.user !== this.props.user) {
+      this.loadPost();
+    }
   }
 
   render() {
