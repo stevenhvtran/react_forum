@@ -371,9 +371,11 @@ class SubmitPost extends Component {
 class Post extends Component {
   constructor(props) {
     super(props);
-    this.state = { post: "", user: "" };
-    this.loadPosts = this.loadPost.bind(this);
+    this.state = { post: "", user: "", showEdit: false };
+    this.loadPost = this.loadPost.bind(this);
     this.deletePost = this.deletePost.bind(this);
+    this.enableEdit = this.enableEdit.bind(this);
+    this.disableEdit = this.disableEdit.bind(this);
     this.showEdit = this.showEdit.bind(this);
   }
 
@@ -398,7 +400,26 @@ class Post extends Component {
       });
   }
 
-  showEdit() {}
+  enableEdit() {
+    this.setState({ showEdit: true });
+  }
+
+  disableEdit() {
+    this.setState({ showEdit: false });
+  }
+
+  showEdit() {
+    if (this.state.showEdit) {
+      return (
+        <EditPost
+          onExit={this.disableEdit}
+          credentials={this.props.credentials}
+          reloadPost={this.loadPost}
+          post_id={this.props.post_id}
+        />
+      );
+    }
+  }
 
   loadPost() {
     fetch(
@@ -418,7 +439,7 @@ class Post extends Component {
         if (json.author_name === this.props.user) {
           postData.push(
             <div>
-              <button onClick={this.showEdit}>Edit</button>
+              <button onClick={this.enableEdit}>Edit</button>
               <button onClick={this.deletePost}>Delete</button>
             </div>
           );
@@ -436,12 +457,87 @@ class Post extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.user !== this.props.user) {
+      this.disableEdit();
       this.loadPost();
     }
   }
 
   render() {
-    return <div className="post">{this.state.post}</div>;
+    return <div className="post">{this.state.post}{this.showEdit()}</div>;
+  }
+}
+
+class EditPost extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { title: "", body: "" };
+    this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.handleBodyChange = this.handleBodyChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleTitleChange(event) {
+    this.setState({ title: event.target.value });
+  }
+
+  handleBodyChange(event) {
+    this.setState({ body: event.target.value });
+  }
+
+  handleClick() {
+    fetch("https://flask-forum-api.herokuapp.com/api/post/" + this.props.post_id, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.props.credentials
+      },
+      mode: "cors",
+      body: JSON.stringify({
+        title: this.state.title,
+        body: this.state.body
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        if (json.message) {
+          this.props.onExit();
+          this.props.reloadPost();
+        }
+      });
+  }
+
+  render() {
+    return (
+      <div className="submit">
+        <form autocomplete="off">
+          <textarea
+            type="text"
+            name="title"
+            placeholder="Write post title here..."
+            value={this.state.title}
+            onChange={this.handleTitleChange}
+            className="title"
+            required
+          />
+          <textarea
+            type="text"
+            name="body"
+            placeholder="Write post body here..."
+            value={this.state.body}
+            onChange={this.handleBodyChange}
+            className="body"
+          />
+          <button type="button" onClick={this.handleClick}>
+            Submit
+          </button>
+          <button type="button" onClick={this.props.onExit}>
+            Cancel
+          </button>
+        </form>
+      </div>
+    );
   }
 }
 
