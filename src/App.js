@@ -8,7 +8,7 @@ class App extends Component {
     this.state = {
       isLoggedIn: false,
       credentials: "",
-      user: "Guest",
+      user: "",
       showRegister: false
     };
     this.handleLogin = this.handleLogin.bind(this);
@@ -51,7 +51,7 @@ class App extends Component {
         display_elements = (
           <div>
             <div className="sep">
-              Not signed in{" "}
+              Not signed in
               <button onClick={this.handleRegister}>Register</button>
             </div>
             <Login onSuccess={this.handleLogin} />
@@ -325,8 +325,8 @@ class SubmitPost extends Component {
   render() {
     return (
       <div className="submit">
-        <form className="pure-form-stacked" autocomplete="off">
-          <input
+        <form autocomplete="off">
+          <textarea
             type="text"
             name="title"
             placeholder="Write post title here..."
@@ -335,7 +335,7 @@ class SubmitPost extends Component {
             className="title"
             required
           />
-          <input
+          <textarea
             type="text"
             name="body"
             placeholder="Write post body here..."

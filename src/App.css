@@ -78,13 +78,13 @@ div.post-wrapper {
   margin: auto;
 }
 
-input.title {
+textarea.title {
   width: 40%;
   resize: none;
   display: block;
 }
 
-input.body {
+textarea.body {
   width: 40%;
   height: 150px;
   resize: none;
