@@ -362,6 +362,9 @@ class SubmitPost extends Component {
           <button type="button" onClick={this.handleClick}>
             Submit
           </button>
+          <button type="button" onClick={this.props.onExit}>
+            Cancel
+          </button>
         </form>
       </div>
     );
